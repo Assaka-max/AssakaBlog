@@ -2,8 +2,15 @@ spring:
   application:
     name: Assaka
   datasource:
-    url: jdbc:mysql://localhost:3306/your_database?useSSL=false&serverTimezone=UTC
+    url: jdbc:mysql://localhost:3306/assakablog?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: root
     password: 123456
     driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update  # 开发环境使用update，生产环境使用validate
+    show-sql: true     # 显示SQL语句，便于调试
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
 
