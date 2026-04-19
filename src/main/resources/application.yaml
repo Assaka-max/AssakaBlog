@@ -6,11 +6,12 @@ spring:
     username: root
     password: 123456
     driver-class-name: com.mysql.cj.jdbc.Driver
-  jpa:
-    hibernate:
-      ddl-auto: update  # 开发环境使用update，生产环境使用validate
-    show-sql: true     # 显示SQL语句，便于调试
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: auto
 
