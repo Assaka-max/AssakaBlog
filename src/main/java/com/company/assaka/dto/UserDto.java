@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 @Data
 public class UserDto {
-    private Integer id;
+    private Long id;
     private String username;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
