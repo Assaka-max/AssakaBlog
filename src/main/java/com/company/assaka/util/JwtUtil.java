@@ -4,6 +4,7 @@ import com.company.assaka.config.JwtConfig;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -21,6 +22,7 @@ public class JwtUtil {
 
     public JwtUtil(JwtConfig jwtConfig){this.jwtConfig = jwtConfig;}
 
+    @PostConstruct
     public void init() {
         // 将 yml 中的字符串密钥转换为符合 HmacSHA256 标准的密钥对象
         JwtUtil.KEY = Keys.hmacShaKeyFor(jwtConfig.getSecret().getBytes(StandardCharsets.UTF_8));

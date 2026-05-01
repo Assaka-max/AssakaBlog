@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.List;
+
 @Controller
 @ResponseBody
 @RequiredArgsConstructor
@@ -15,7 +17,7 @@ public class Test{
     private final UserService userService;
 
     @GetMapping("/test")
-    public UserDto test(@RequestParam String username){
-        return userService.findUserByName(username);
+    public List<UserDto> test(@RequestParam String username){
+        return userService.findUserListByName(username);
     }
 }

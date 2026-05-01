@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>后端拦截器测试页面</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4; }
+    .box { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    h3 { margin-top: 0; }
+    input { padding: 8px; margin-right: 10px; border: 1px solid #ccc; border-radius: 4px; }
+    button { padding: 8px 15px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    button:hover { background: #0056b3; }
+    pre { background: #333; color: #0f0; padding: 10px; border-radius: 4px; overflow-x: auto; font-size: 14px;}
+    .status { font-weight: bold; margin-bottom: 10px; padding: 5px; border-radius: 4px; }
+    .success { background: #d4edda; color: #155724; }
+    .error { background: #f8d7da; color: #721c24; }
+  </style>
+</head>
+<body>
+
+<h2>AuthInterceptor 拦截器验证工具</h2>
+<p>请确保你的后端已经启动，并且解决了跨域问题(CORS)。</p>
+
+<!-- 第一步：模拟游客 -->
+<div class="box">
+  <h3>1. 模拟游客进入 (获取游客Token)</h3>
+  <button onclick="getVisitorToken()">获取游客Token</button>
+</div>
+
+<!-- 第二步：管理员登录表单 -->
+<div class="box">
+  <h3>2. 管理员登录表单</h3>
+  <form id="loginForm" onsubmit="adminLogin(event)">
+    <input type="text" id="username" placeholder="管理员用户名" value="admin" required>
+    <input type="password" id="password" placeholder="管理员密码" value="123456" required>
+    <button type="submit">登录获取管理员Token</button>
+  </form>
+</div>
+
+<!-- 第三步：测试拦截器 -->
+<div class="box">
+  <h3>3. 测试后端接口与拦截器</h3>
+  <button onclick="testPublicApi()">测试公开接口 (无需特定角色)</button>
+  <button onclick="testAdminApi()">测试管理员接口 (需admin角色)</button>
+  <button onclick="testNoToken()">测试不带Token直接请求</button>
+</div>
+
+<!-- 显示结果 -->
+<div class="box">
+  <h3>控制台输出结果：</h3>
+  <div id="statusBox"></div>
+  <pre id="output"></pre>
+</div>
+
+<script>
+  // 你的后端地址，注意加上 /api，根据你的实际情况修改端口号
+  const BASE_URL = 'http://localhost:8080/api';
+  let currentToken = "";
+
+  // 封装输出日志的方法
+  function log(msg, isSuccess = true) {
+    const output = document.getElementById('output');
+    const statusBox = document.getElementById('statusBox');
+    const time = new Date().toLocaleTimeString();
+    const prefix = isSuccess ? '✅ [成功]' : '❌ [失败/拦截]';
+    output.textContent += `[${time}] ${prefix} ${msg}\n`;
+    output.scrollTop = output.scrollHeight;
+
+    statusBox.className = isSuccess ? 'status success' : 'status error';
+    statusBox.innerText = isSuccess ? '请求成功（拦截器放行）' : '请求被拒绝（拦截器生效）';
+  }
+
+  // 1. 获取游客Token
+  async function getVisitorToken() {
+    try {
+      const res = await fetch(`${BASE_URL}/auth/visitor`, { method: 'POST' });
+      const data = await res.json();
+      if (data.code === 200) {
+        currentToken = data.data; // 假设你的 Result 返回格式是 {code:200, data:"token字符串"}
+        log(`拿到游客Token: ${currentToken.substring(0, 20)}... (已模拟存入localStorage)`);
+      } else {
+        log(`获取游客Token失败: ${data.message}`, false);
+      }
+    } catch (e) {
+      log(`网络错误，请检查后端是否启动或跨域配置: ${e}`, false);
+    }
+  }
+
+  // 2. 表单提交，管理员登录
+  async function adminLogin(event) {
+    event.preventDefault(); // 阻止表单默认刷新
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+
+    try {
+      const res = await fetch(`${BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      const data = await res.json();
+      if (data.code === 200) {
+        currentToken = data.data; // 覆盖掉原来的游客Token
+        log(`管理员登录成功! 拿到Admin Token: ${currentToken.substring(0, 20)}...`);
+      } else {
+        log(`管理员登录失败: ${data.message} (拦截器不会拦登录接口本身)`, false);
+      }
+    } catch (e) {
+      log(`网络错误: ${e}`, false);
+    }
+  }
+
+  // 3. 测试公开接口 (假设是 GET /api/blogs)
+  async function testPublicApi() {
+    try {
+      const res = await fetch(`${BASE_URL}/blogs`, {
+        method: 'GET',
+        headers: { 'Authorization': currentToken } // 带上当前的Token
+      });
+      const data = await res.json();
+      // 只要是游客或管理员Token，都应该放行
+      if (res.status === 200) {
+        log(`公开接口测试通过! 拦截器识别角色放行。返回数据条数: ${data.data?.length || 0}`);
+      } else {
+        log(`意外错误: ${JSON.stringify(data)}`, false);
+      }
+    } catch (e) {
+      log(`网络错误: ${e}`, false);
+    }
+  }
+
+  // 4. 测试管理员接口 (假设是 GET /api/blogs/admin/all)
+  async function testAdminApi() {
+    try {
+      const res = await fetch(`${BASE_URL}/blogs/admin/all`, {
+        method: 'GET',
+        headers: { 'Authorization': currentToken } // 带上当前的Token
+      });
+      const data = await res.json();
+
+      if (res.status === 200) {
+        log(`管理员接口测试通过! 当前Token拥有Admin权限，拦截器放行!`);
+      } else if (res.status === 403) {
+        // 核心验证点：如果你用的是游客Token去点这个，拦截器应该返回403！
+        log(`被拦截器拦截! HTTP 403 Forbidden。原因：当前是游客Token，无权访问 /admin 路径`, false);
+      } else {
+        log(`其他错误: ${JSON.stringify(data)}`, false);
+      }
+    } catch (e) {
+      log(`网络错误: ${e}`, false);
+    }
+  }
+
+  // 5. 测试不带 Token 直接请求
+  async function testNoToken() {
+    try {
+      const res = await fetch(`${BASE_URL}/blogs/admin/all`, {
+        method: 'GET'
+        // 故意不传 Authorization 请求头
+      });
+      if (res.status === 401) {
+        // 核心验证点：没带Token，拦截器应该直接打回401！
+        log(`被拦截器拦截! HTTP 401 Unauthorized。原因：请求头未携带Token`, false);
+      } else {
+        log(`意外：没带Token居然放行了？请检查拦截器配置!`, false);
+      }
+    } catch (e) {
+      log(`网络错误: ${e}`, false);
+    }
+  }
+</script>
+</body>
+</html>
