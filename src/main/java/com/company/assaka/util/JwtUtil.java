@@ -38,7 +38,7 @@ public class JwtUtil {
      * @param claims 自定义的 payload 数据（比如存放 userId, userType 等）
      * @return 返回签发的 JWT 字符串
      */
-    public static String generateToken(Map<String, Object> claims) {
+    public static String generateToken(Map<String, String> claims) {
         long nowMillis = System.currentTimeMillis();
         Date now = new Date(nowMillis);
         Date expDate = new Date(nowMillis + EXPIRATION);

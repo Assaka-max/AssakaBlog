@@ -76,7 +76,7 @@
       const res = await fetch(`${BASE_URL}/auth/visitor`, { method: 'POST' });
       const data = await res.json();
       if (data.code === 200) {
-        currentToken = data.data; // 假设你的 Result 返回格式是 {code:200, data:"token字符串"}
+        currentToken = data.data.token; // 假设你的 Result 返回格式是 {code:200, data:"token字符串"}
         log(`拿到游客Token: ${currentToken.substring(0, 20)}... (已模拟存入localStorage)`);
       } else {
         log(`获取游客Token失败: ${data.message}`, false);
@@ -100,7 +100,7 @@
       });
       const data = await res.json();
       if (data.code === 200) {
-        currentToken = data.data; // 覆盖掉原来的游客Token
+        currentToken = data.data.token; // 覆盖掉原来的游客Token
         log(`管理员登录成功! 拿到Admin Token: ${currentToken.substring(0, 20)}...`);
       } else {
         log(`管理员登录失败: ${data.message} (拦截器不会拦登录接口本身)`, false);
@@ -132,7 +132,7 @@
   // 4. 测试管理员接口 (假设是 GET /api/blogs/admin/all)
   async function testAdminApi() {
     try {
-      const res = await fetch(`${BASE_URL}/blogs/admin/all`, {
+      const res = await fetch(`${BASE_URL}/admin/test`, {
         method: 'GET',
         headers: { 'Authorization': currentToken } // 带上当前的Token
       });

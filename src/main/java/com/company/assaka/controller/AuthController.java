@@ -1,6 +1,7 @@
 package com.company.assaka.controller;
 
 import com.company.assaka.dto.Result;
+import com.company.assaka.util.JwtUtil;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -16,14 +17,11 @@ public class AuthController {
      */
     @PostMapping("/visitor")
     public Result generateVisitorToken() {
-        // 极致简陋版：用 UUID 随便生成一个字符串，假装它是 Token
-        // 真实环境这里用 JWT，但现在我们的目的是测试拦截器能不能识别字符串
-        String fakeVisitorToken = "visitor_token_" + UUID.randomUUID().toString().replace("-", "");
-
+        Map<String, String> tokenMessage = new HashMap<>();
+        tokenMessage.put("userType", "visitor");
+        String realJwtToken = JwtUtil.generateToken(tokenMessage);
         Map<String, String> data = new HashMap<>();
-        data.put("token", fakeVisitorToken);
-        data.put("role", "visitor"); // 假装把角色塞进去了
-
+        data.put("token", realJwtToken);
         return Result.success(data);
     }
 
@@ -37,12 +35,11 @@ public class AuthController {
 
         // 极简验证：假设你的管理员账号密码是 admin / 123
         if ("admin".equals(username) && "123".equals(password)) {
-            String fakeAdminToken = "admin_token_" + UUID.randomUUID().toString().replace("-", "");
-
+            Map<String, String> tokenMessage = new HashMap<>();
+            tokenMessage.put("userType", "admin");
+            String realJwtToken = JwtUtil.generateToken(tokenMessage);
             Map<String, String> data = new HashMap<>();
-            data.put("token", fakeAdminToken);
-            data.put("role", "admin"); // 假装把角色塞进去了
-
+            data.put("token", realJwtToken);
             return Result.success(data);
         } else {
             return Result.error("账号或密码错误");
