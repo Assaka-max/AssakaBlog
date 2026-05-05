@@ -113,7 +113,7 @@
   // 3. 测试公开接口 (假设是 GET /api/blogs)
   async function testPublicApi() {
     try {
-      const res = await fetch(`${BASE_URL}/blogs`, {
+      const res = await fetch(`${BASE_URL}/auth/public/test`, {
         method: 'GET',
         headers: { 'Authorization': currentToken } // 带上当前的Token
       });
@@ -132,7 +132,7 @@
   // 4. 测试管理员接口 (假设是 GET /api/blogs/admin/all)
   async function testAdminApi() {
     try {
-      const res = await fetch(`${BASE_URL}/admin/test`, {
+      const res = await fetch(`${BASE_URL}/auth/admin/test`, {
         method: 'GET',
         headers: { 'Authorization': currentToken } // 带上当前的Token
       });

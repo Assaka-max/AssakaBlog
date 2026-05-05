@@ -1,7 +1,10 @@
 package com.company.assaka.controller;
 
+import com.company.assaka.dto.AdminDto;
 import com.company.assaka.dto.Result;
+import com.company.assaka.service.AuthService;
 import com.company.assaka.util.JwtUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -10,8 +13,10 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/auth")
+@RequiredArgsConstructor
 public class AuthController {
 
+    private final AuthService authService;
     /**
      * 对应 test.html 的【获取游客Token】按钮
      */
@@ -32,11 +37,11 @@ public class AuthController {
     public Result adminLogin(@RequestBody Map<String, String> requestBody) {
         String username = requestBody.get("username");
         String password = requestBody.get("password");
-
-        // 极简验证：假设你的管理员账号密码是 admin / 123
-        if ("admin".equals(username) && "123".equals(password)) {
+        AdminDto adminDto = authService.AdminAuth(username, password);
+        // 极简验证：假设你的管理员账号密码是 admin / 123456
+        if (adminDto != null) {
             Map<String, String> tokenMessage = new HashMap<>();
-            tokenMessage.put("userType", "admin");
+            tokenMessage.put("userType", adminDto.getUsername());
             String realJwtToken = JwtUtil.generateToken(tokenMessage);
             Map<String, String> data = new HashMap<>();
             data.put("token", realJwtToken);
@@ -52,6 +57,7 @@ public class AuthController {
      */
     @GetMapping("/admin/test")
     public Result testAdminApi() {
+        System.out.println("kkk");
         return Result.success("恭喜！你成功携带管理员身份穿透了拦截器！");
     }
 
