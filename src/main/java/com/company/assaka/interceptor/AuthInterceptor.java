@@ -10,13 +10,7 @@ public class AuthInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception{
-        String token = request.getHeader("Authorization");
-
-        if(token == null || token.isEmpty()){
-            response.setStatus(401);
-            response.getWriter().write("{\"code\":401, \"message\":\"未携带身份凭证\"}");
-            return false;
-        }
+        String token = (String) request.getAttribute("token");
 
         try{
             //解析 Token，拿到里面的角色信息

@@ -1,5 +1,6 @@
 package com.company.assaka.dto;
 
+import com.company.assaka.domain.Blog;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -17,4 +18,16 @@ public class BlogDto {
     private Integer typeId;
     private Long userId;
 
+    public BlogDto(Blog blog){
+        this.id = blog.getId();
+        this.title = blog.getTitle();
+        this.description = blog.getDescription();
+        this.firstPicture = blog.getFirstPicture();
+        this.isPublished = blog.getIsPublished();
+        this.views = blog.getViews();
+        this.createTime = blog.getCreateTime();
+        this.updateTime = blog.getUpdateTime();
+        this.typeId = blog.getTypeId();
+        this.userId = blog.getUserId();
+    }
 }

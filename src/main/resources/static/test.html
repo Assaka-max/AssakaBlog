@@ -52,6 +52,11 @@
   <pre id="output"></pre>
 </div>
 
+<div class="box">
+  <h3>查询所有文章</h3>
+  <button onclick="testGetAllBlog()">只要有token就行</button>
+</div>
+
 <script>
   // 你的后端地址，注意加上 /api，根据你的实际情况修改端口号
   const BASE_URL = 'http://localhost:8080/api';
@@ -165,6 +170,29 @@
         log(`意外：没带Token居然放行了？请检查拦截器配置!`, false);
       }
     } catch (e) {
+      log(`网络错误: ${e}`, false);
+    }
+  }
+
+  //测试获取所有文章
+  async function testGetAllBlog(){
+    try {
+      const res = await fetch(`${BASE_URL}/blog/all`,{
+        method: 'GET',
+        headers: { 'Authorization': currentToken }
+      })
+      if (!res.ok) {
+        log(`HTTP错误: ${res.status} ${res.statusText}`, false);
+        return;
+      }
+      const data = await res.json();
+      if(data.code === 200){
+        const blogs = data.data;
+        log(`成功找到所有文章：${JSON.stringify(blogs)},业务状态码：${data.code}`);
+      }else if(data.code === 500){
+        log(`无法找到任何文章`);
+      }
+    }catch(e){
       log(`网络错误: ${e}`, false);
     }
   }
